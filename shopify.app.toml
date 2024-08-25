@@ -3,13 +3,13 @@
 client_id = "107bb37d3aed7611a0172bbcf05ae275"
 name = "node-remix"
 handle = "node-remix-1"
-application_url = "https://jet-proposal-funeral-fighters.trycloudflare.com"
+application_url = "https://takes-grade-penalties-formation.trycloudflare.com"
 embedded = true
 
 [build]
 automatically_update_urls_on_dev = true
-dev_store_url = "toys-brother.myshopify.com"
-include_config_on_deploy = true
+dev_store_url = "checkoutex-testing.myshopify.com"
+include_config_on_deploy = false
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
@@ -17,9 +17,9 @@ scopes = "read_customers,read_inventory,read_locations,read_orders,read_products
 
 [auth]
 redirect_urls = [
-  "https://jet-proposal-funeral-fighters.trycloudflare.com/auth/callback",
-  "https://jet-proposal-funeral-fighters.trycloudflare.com/auth/shopify/callback",
-  "https://jet-proposal-funeral-fighters.trycloudflare.com/api/auth/callback"
+  "https://takes-grade-penalties-formation.trycloudflare.com/auth/callback",
+  "https://takes-grade-penalties-formation.trycloudflare.com/auth/shopify/callback",
+  "https://takes-grade-penalties-formation.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

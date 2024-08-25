@@ -14,6 +14,10 @@ export const query = `
           handle
           updatedAt
           sortOrder
+          image {
+            url
+            altText
+          }
         }
       }
     }
@@ -69,15 +73,39 @@ export default function Reports() {
 
   return (
     <Page>
-      <TitleBar title="Orders" />
-      {collections.map(({ node }) => (
-        <div key={node.id}>
-          <h3>{node.title}</h3>
-          <p>Handle: {node.handle}</p>
-          <p>Updated at: {node.updatedAt}</p>
-          <p>Sort Order: {node.sortOrder}</p>
-        </div>
-      ))}
+      <TitleBar title="Collections" />
+      <LegacyCard>
+        <ResourceList
+          resourceName={{ singular: 'collection', plural: 'collections' }}
+          items={collections.map(({ node }) => ({
+            id: node.id,
+            name: node.title,
+            updatedAt: node.updatedAt,
+            sortOrder: node.sortOrder,
+            image: node.image?.url || '', // Image source if available
+            altText: node.image?.altText || 'Collection image',
+          }))}
+          renderItem={(item) => {
+            const { id, url, name, image, altText, updatedAt, sortOrder } = item;
+            const media = <Avatar customer size="md" source={image} name={name} alt={altText} />;
+
+            return (
+              <ResourceItem
+                id={id}
+                url={url}
+                media={media}
+                accessibilityLabel={`View details for ${name}`}
+              >
+                <Text variant="bodyMd" fontWeight="bold" as="h3">
+                  {name}
+                </Text>
+                <div>Updated at: {new Date(updatedAt).toLocaleDateString()}</div>
+                <div>Sort Order: {sortOrder}</div>
+              </ResourceItem>
+            );
+          }}
+        />
+      </LegacyCard>
     </Page>
   );
 }

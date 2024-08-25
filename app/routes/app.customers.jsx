@@ -17,34 +17,17 @@ import { authenticate, apiVersion } from "../shopify.server";
 import { useLoaderData, useNavigate, useLocation } from "@remix-run/react";
 
 export const query = `
-  query Products($first: Int, $afterCursor: String, $last: Int, $beforeCursor: String) {
-      products(first: $first, after: $afterCursor, last: $last, before: $beforeCursor) {
+  query customers($first: Int, $afterCursor: String, $last: Int, $beforeCursor: String) {
+      customers(first: $first, after: $afterCursor, last: $last, before: $beforeCursor) {
       edges {
-      node {
-        id
-        title
-        vendor
-        status
-        variants(first: 5) {
-          nodes {
-            inventoryItem {
-              id
-            }
-            price
+          node {
+            id
             displayName
-            contextualPricing(context: {}) {
-              compareAtPrice {
-                amount
-                currencyCode
-              }
-              price {
-                amount
-                currencyCode
-              }
-            }
+            email
+            phone
+            
           }
         }
-      }
     }
       pageInfo {
         endCursor
@@ -92,7 +75,7 @@ export const loader = async ({ request }) => {
       const { products } = data.data;
 
       return {
-        products: products.edges,
+        customers: products.edges,
         hasNextPage: products.pageInfo.hasNextPage,
         endCursor: products.pageInfo.endCursor,
         hasPreviousPage: products.pageInfo.hasPreviousPage,
@@ -108,9 +91,9 @@ export const loader = async ({ request }) => {
   }
 };
 
-export default function ProductsPage() {
-  const { products, hasNextPage, endCursor, hasPreviousPage, startCursor } = useLoaderData();
-  console.log(products ,  "products");
+export default function CustomersPage() {
+  const { customers, hasNextPage, endCursor, hasPreviousPage, startCursor } = useLoaderData();
+  console.log(customers ,  "products");
   const navigate = useNavigate();
  
 
@@ -126,29 +109,29 @@ export default function ProductsPage() {
     }
   };
 
-  const rowMarkup = products.map(
-    (node, index) => (
-      <IndexTable.Row id={node.node.id} key={node.node.id} position={index}>
-        <IndexTable.Cell>
-          <Text variant="bodyMd" fontWeight="bold" as="span">
-            {node.node.title.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}
-          </Text>
-        </IndexTable.Cell>
-        <IndexTable.Cell>{node.node.vendor.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
-        <IndexTable.Cell>{node.node.status.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
-        <IndexTable.Cell>{
-          new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: node.node.variants.nodes[0].contextualPricing.price.currencyCode,
-          }).format(node.node.variants.nodes[0].contextualPricing.price.amount)}
-        </IndexTable.Cell>
-      </IndexTable.Row>
-    ),
-  );
+  // const rowMarkup = products.map(
+  //   (node, index) => (
+  //     <IndexTable.Row id={node.node.id} key={node.node.id} position={index}>
+  //       <IndexTable.Cell>
+  //         <Text variant="bodyMd" fontWeight="bold" as="span">
+  //           {node.node.title.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}
+  //         </Text>
+  //       </IndexTable.Cell>
+  //       <IndexTable.Cell>{node.node.vendor.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
+  //       <IndexTable.Cell>{node.node.status.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
+  //       <IndexTable.Cell>{
+  //         new Intl.NumberFormat('en-US', {
+  //           style: 'currency',
+  //           currency: node.node.variants.nodes[0].contextualPricing.price.currencyCode,
+  //         }).format(node.node.variants.nodes[0].contextualPricing.price.amount)}
+  //       </IndexTable.Cell>
+  //     </IndexTable.Row>
+  //   ),
+  // );
 
   const resourceName = {
-    singular: 'product',
-    plural: 'products',
+    singular: 'customer',
+    plural: 'customers',
   };
 
   return (
@@ -158,12 +141,12 @@ export default function ProductsPage() {
         <IndexTable
           condensed={useBreakpoints().smDown}
           resourceName={resourceName}
-          itemCount={products.length}
+          itemCount={customers.length}
           headings={[
-            { title: 'Title' },
-            { title: 'Vendor' },
-            { title: 'Status' },
-            { title: 'Price' },
+            { title: 'id' },
+            { title: 'Name' },
+            { title: 'email' },
+            { title: 'phone' },
           ]}
           selectable={false}
           pagination={{

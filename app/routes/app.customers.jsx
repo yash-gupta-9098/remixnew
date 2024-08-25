@@ -5,21 +5,26 @@ import { Page, Card, DataTable, Layout, Spinner } from '@shopify/polaris';
 
 // Loader function to fetch customer data from Shopify API
 export const loader = async () => {
-    const { session } = await authenticate.admin(request);
-  const { shop, accessToken } = session;
+    const { session , admin } = await authenticate.admin(request);  
   try {
-    const response = await fetch(`https://${shop}/admin/api/2024-01/customers.json`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': accessToken, // Replace with your actual token
-      },
+
+    const response = await admin.rest.resources.Customer.all({
+      session: session,
     });
+    // const response = await fetch(`https://${shop}/admin/api/2024-01/customers.json`, {
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'X-Shopify-Access-Token': accessToken, // Replace with your actual token
+    //   },
+    // });
+
 
     if (!response.ok) {
       throw new Error('Failed to fetch customers');
     }
 
     const data = await response.json();
+    console.log(data , "data");
     return json({ customers: data.customers });
   } catch (error) {
     console.error('Error fetching customers:', error);

@@ -169,19 +169,8 @@ import {
                       {variant.displayName}
                     </Text>
                   </IndexTable.Cell>
-                  <IndexTable.Cell>
-                    <Text variant="bodyMd" as="span">
-                      {new Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: variant.contextualPricing.price.currencyCode,
-                      }).format(variant.contextualPricing.price.amount)}
-                    </Text>
-                  </IndexTable.Cell>
-                  <IndexTable.Cell>
-                    <Text variant="bodyMd" as="span">
-                      {variant.inventoryQuantity}
-                    </Text>
-                  </IndexTable.Cell>
+                  <IndexTable.Cell/>                    
+                  <IndexTable.Cell />
   
                   {/* Inventory Locations */}
                   {variant.inventoryItem.inventoryLevels.edges.map((inventoryEdge) => (

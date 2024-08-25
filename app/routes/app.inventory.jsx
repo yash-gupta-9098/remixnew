@@ -148,14 +148,9 @@ import {
                 {product.node.title.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}
               </Text>
             </IndexTable.Cell>
-            <IndexTable.Cell>{product.node.vendor.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
-            <IndexTable.Cell>{product.node.status.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
-            <IndexTable.Cell>
-              {new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: productVariants[0].contextualPricing.price.currencyCode,
-              }).format(productVariants[0].contextualPricing.price.amount)}
-            </IndexTable.Cell>
+            <IndexTable.Cell />
+            <IndexTable.Cell />
+            <IndexTable.Cell />
           </IndexTable.Row>
   
           {/* Nested Rows for Variants and Inventory */}
@@ -169,8 +164,19 @@ import {
                       {variant.displayName}
                     </Text>
                   </IndexTable.Cell>
-                  <IndexTable.Cell/>                    
-                  <IndexTable.Cell />
+                  <IndexTable.Cell>
+                    <Text variant="bodyMd" as="span">
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: variant.contextualPricing.price.currencyCode,
+                      }).format(variant.contextualPricing.price.amount)}
+                    </Text>
+                  </IndexTable.Cell>
+                  <IndexTable.Cell>
+                    <Text variant="bodyMd" as="span">
+                      {variant.inventoryQuantity}
+                    </Text>
+                  </IndexTable.Cell>
   
                   {/* Inventory Locations */}
                   {variant.inventoryItem.inventoryLevels.edges.map((inventoryEdge) => (
@@ -214,9 +220,10 @@ import {
             itemCount={products.length}
             headings={[
               { title: 'Title' },
-              { title: 'Vendor' },
-              { title: 'Status' },
               { title: 'Price' },
+              { title: 'available' },
+              { title: 'location Name' },
+              { title: 'location Status' },
             ]}
             selectable={false}
             pagination={{

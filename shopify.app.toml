@@ -1,0 +1,29 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "107bb37d3aed7611a0172bbcf05ae275"
+name = "node-remix"
+handle = "node-remix-1"
+application_url = "https://boxes-interventions-updates-leads.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "toys-brother.myshopify.com"
+include_config_on_deploy = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_customers,read_inventory,read_locations,read_orders,read_products,write_inventory,write_products"
+
+[auth]
+redirect_urls = [
+  "https://boxes-interventions-updates-leads.trycloudflare.com/auth/callback",
+  "https://boxes-interventions-updates-leads.trycloudflare.com/auth/shopify/callback",
+  "https://boxes-interventions-updates-leads.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-07"
+
+[pos]
+embedded = false

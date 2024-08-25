@@ -3,7 +3,7 @@
 client_id = "107bb37d3aed7611a0172bbcf05ae275"
 name = "node-remix"
 handle = "node-remix-1"
-application_url = "https://poetry-the-miracle-legislature.trycloudflare.com"
+application_url = "https://remixnew.onrender.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_customers,read_inventory,read_locations,read_orders,read_products
 
 [auth]
 redirect_urls = [
-  "https://poetry-the-miracle-legislature.trycloudflare.com/auth/callback",
-  "https://poetry-the-miracle-legislature.trycloudflare.com/auth/shopify/callback",
-  "https://poetry-the-miracle-legislature.trycloudflare.com/api/auth/callback"
+  "https://remixnew.onrender.com/auth/callback",
+  "https://remixnew.onrender.com/auth/shopify/callback",
+  "https://remixnew.onrender.com/api/auth/callback"
 ]
 
 [webhooks]

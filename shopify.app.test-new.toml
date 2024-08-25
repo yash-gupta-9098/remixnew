@@ -1,0 +1,29 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "f87a1cbef52c210871156a91c70fc5a8"
+name = "test- new"
+handle = "test-new-20"
+application_url = "https://remixnew.onrender.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = false
+dev_store_url = "new-remix-app.myshopify.com"
+include_config_on_deploy = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_customers,read_inventory,read_locations,read_orders,read_products,write_discounts,write_inventory,write_products"
+
+[auth]
+redirect_urls = [
+  "https://remixnew.onrender.com/auth/callback",
+  "https://remixnew.onrender.com/auth/shopify/callback",
+  "https://remixnew.onrender.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-07"
+
+[pos]
+embedded = false

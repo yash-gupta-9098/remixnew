@@ -3,7 +3,7 @@
 client_id = "107bb37d3aed7611a0172bbcf05ae275"
 name = "node-remix"
 handle = "node-remix-1"
-application_url = "https://takes-grade-penalties-formation.trycloudflare.com"
+application_url = "https://worldwide-appendix-reviews-gross.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_customers,read_inventory,read_locations,read_orders,read_products
 
 [auth]
 redirect_urls = [
-  "https://takes-grade-penalties-formation.trycloudflare.com/auth/callback",
-  "https://takes-grade-penalties-formation.trycloudflare.com/auth/shopify/callback",
-  "https://takes-grade-penalties-formation.trycloudflare.com/api/auth/callback"
+  "https://worldwide-appendix-reviews-gross.trycloudflare.com/auth/callback",
+  "https://worldwide-appendix-reviews-gross.trycloudflare.com/auth/shopify/callback",
+  "https://worldwide-appendix-reviews-gross.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

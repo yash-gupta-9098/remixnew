@@ -27,6 +27,7 @@ export const query = `
         status
         variants(first: 5) {
           nodes {
+            inventoryQuantity
             inventoryItem {
               id
             }
@@ -142,6 +143,7 @@ export default function ProductsPage() {
             currency: node.node.variants.nodes[0].contextualPricing.price.currencyCode,
           }).format(node.node.variants.nodes[0].contextualPricing.price.amount)}
         </IndexTable.Cell>
+          
       </IndexTable.Row>
     ),
   );

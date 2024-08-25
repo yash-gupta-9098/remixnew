@@ -17,17 +17,34 @@ import { authenticate, apiVersion } from "../shopify.server";
 import { useLoaderData, useNavigate, useLocation } from "@remix-run/react";
 
 export const query = `
-  query customers($first: Int, $afterCursor: String, $last: Int, $beforeCursor: String) {
-      customers(first: $first, after: $afterCursor, last: $last, before: $beforeCursor) {
+  query Products($first: Int, $afterCursor: String, $last: Int, $beforeCursor: String) {
+      products(first: $first, after: $afterCursor, last: $last, before: $beforeCursor) {
       edges {
-          node {
-            id
+      node {
+        id
+        title
+        vendor
+        status
+        variants(first: 5) {
+          nodes {
+            inventoryItem {
+              id
+            }
+            price
             displayName
-            email
-            phone
-            
+            contextualPricing(context: {}) {
+              compareAtPrice {
+                amount
+                currencyCode
+              }
+              price {
+                amount
+                currencyCode
+              }
+            }
           }
         }
+      }
     }
       pageInfo {
         endCursor
@@ -75,7 +92,7 @@ export const loader = async ({ request }) => {
       const { products } = data.data;
 
       return {
-        customers: products.edges,
+        products: products.edges,
         hasNextPage: products.pageInfo.hasNextPage,
         endCursor: products.pageInfo.endCursor,
         hasPreviousPage: products.pageInfo.hasPreviousPage,
@@ -92,8 +109,8 @@ export const loader = async ({ request }) => {
 };
 
 export default function ProductsPage() {
-  const { customers, hasNextPage, endCursor, hasPreviousPage, startCursor } = useLoaderData();
-  console.log(customers ,  "products");
+  const { products, hasNextPage, endCursor, hasPreviousPage, startCursor } = useLoaderData();
+  console.log(products ,  "products");
   const navigate = useNavigate();
  
 
@@ -109,29 +126,29 @@ export default function ProductsPage() {
     }
   };
 
-  // const rowMarkup = products.map(
-  //   (node, index) => (
-  //     <IndexTable.Row id={node.node.id} key={node.node.id} position={index}>
-  //       <IndexTable.Cell>
-  //         <Text variant="bodyMd" fontWeight="bold" as="span">
-  //           {node.node.title.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}
-  //         </Text>
-  //       </IndexTable.Cell>
-  //       <IndexTable.Cell>{node.node.vendor.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
-  //       <IndexTable.Cell>{node.node.status.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
-  //       <IndexTable.Cell>{
-  //         new Intl.NumberFormat('en-US', {
-  //           style: 'currency',
-  //           currency: node.node.variants.nodes[0].contextualPricing.price.currencyCode,
-  //         }).format(node.node.variants.nodes[0].contextualPricing.price.amount)}
-  //       </IndexTable.Cell>
-  //     </IndexTable.Row>
-  //   ),
-  // );
+  const rowMarkup = products.map(
+    (node, index) => (
+      <IndexTable.Row id={node.node.id} key={node.node.id} position={index}>
+        <IndexTable.Cell>
+          <Text variant="bodyMd" fontWeight="bold" as="span">
+            {node.node.title.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}
+          </Text>
+        </IndexTable.Cell>
+        <IndexTable.Cell>{node.node.vendor.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
+        <IndexTable.Cell>{node.node.status.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
+        <IndexTable.Cell>{
+          new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: node.node.variants.nodes[0].contextualPricing.price.currencyCode,
+          }).format(node.node.variants.nodes[0].contextualPricing.price.amount)}
+        </IndexTable.Cell>
+      </IndexTable.Row>
+    ),
+  );
 
   const resourceName = {
-    singular: 'customer',
-    plural: 'customers',
+    singular: 'product',
+    plural: 'products',
   };
 
   return (
@@ -141,12 +158,12 @@ export default function ProductsPage() {
         <IndexTable
           condensed={useBreakpoints().smDown}
           resourceName={resourceName}
-          itemCount={customers.length}
+          itemCount={products.length}
           headings={[
-            { title: 'id' },
-            { title: 'Name' },
-            { title: 'email' },
-            { title: 'phone' },
+            { title: 'Title' },
+            { title: 'Vendor' },
+            { title: 'Status' },
+            { title: 'Price' },
           ]}
           selectable={false}
           pagination={{

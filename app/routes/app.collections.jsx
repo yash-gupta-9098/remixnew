@@ -1,5 +1,5 @@
 import { TitleBar } from "@shopify/app-bridge-react";
-import { Page } from "@shopify/polaris"; // Ensure Polaris components are imported
+import { LegacyCard, Page, ResourceItem, ResourceList } from "@shopify/polaris"; // Ensure Polaris components are imported
 import { useLoaderData } from "@remix-run/react"; // Import useLoaderData
 
 import { authenticate, apiVersion } from "../shopify.server";

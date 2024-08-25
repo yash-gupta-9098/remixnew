@@ -109,25 +109,25 @@ export default function ProductsPage() {
     }
   };
 
-  const rowMarkup = products.map(
-    (node, index) => (
-      <IndexTable.Row id={node.node.id} key={node.node.id} position={index}>
-        <IndexTable.Cell>
-          <Text variant="bodyMd" fontWeight="bold" as="span">
-            {node.node.title.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}
-          </Text>
-        </IndexTable.Cell>
-        <IndexTable.Cell>{node.node.vendor.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
-        <IndexTable.Cell>{node.node.status.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
-        <IndexTable.Cell>{
-          new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: node.node.variants.nodes[0].contextualPricing.price.currencyCode,
-          }).format(node.node.variants.nodes[0].contextualPricing.price.amount)}
-        </IndexTable.Cell>
-      </IndexTable.Row>
-    ),
-  );
+  // const rowMarkup = products.map(
+  //   (node, index) => (
+  //     <IndexTable.Row id={node.node.id} key={node.node.id} position={index}>
+  //       <IndexTable.Cell>
+  //         <Text variant="bodyMd" fontWeight="bold" as="span">
+  //           {node.node.title.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}
+  //         </Text>
+  //       </IndexTable.Cell>
+  //       <IndexTable.Cell>{node.node.vendor.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
+  //       <IndexTable.Cell>{node.node.status.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
+  //       <IndexTable.Cell>{
+  //         new Intl.NumberFormat('en-US', {
+  //           style: 'currency',
+  //           currency: node.node.variants.nodes[0].contextualPricing.price.currencyCode,
+  //         }).format(node.node.variants.nodes[0].contextualPricing.price.amount)}
+  //       </IndexTable.Cell>
+  //     </IndexTable.Row>
+  //   ),
+  // );
 
   const resourceName = {
     singular: 'customer',
@@ -143,10 +143,10 @@ export default function ProductsPage() {
           resourceName={resourceName}
           itemCount={customers.length}
           headings={[
-            { title: 'Title' },
-            { title: 'Vendor' },
-            { title: 'Status' },
-            { title: 'Price' },
+            { title: 'id' },
+            { title: 'Name' },
+            { title: 'email' },
+            { title: 'phone' },
           ]}
           selectable={false}
           pagination={{

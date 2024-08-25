@@ -3,7 +3,7 @@
 client_id = "107bb37d3aed7611a0172bbcf05ae275"
 name = "node-remix"
 handle = "node-remix-1"
-application_url = "https://boxes-interventions-updates-leads.trycloudflare.com"
+application_url = "https://urls-instrument-recovered-ar.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_customers,read_inventory,read_locations,read_orders,read_products
 
 [auth]
 redirect_urls = [
-  "https://boxes-interventions-updates-leads.trycloudflare.com/auth/callback",
-  "https://boxes-interventions-updates-leads.trycloudflare.com/auth/shopify/callback",
-  "https://boxes-interventions-updates-leads.trycloudflare.com/api/auth/callback"
+  "https://urls-instrument-recovered-ar.trycloudflare.com/auth/callback",
+  "https://urls-instrument-recovered-ar.trycloudflare.com/auth/shopify/callback",
+  "https://urls-instrument-recovered-ar.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

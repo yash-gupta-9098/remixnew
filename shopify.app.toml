@@ -21,7 +21,7 @@ redirect_urls = [
   "https://remixnew.onrender.com/auth/shopify/callback",
   "https://remixnew.onrender.com/api/auth/callback"
 ]
-
+ 
 [webhooks]
 api_version = "2024-07"
 

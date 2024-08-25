@@ -190,12 +190,7 @@ import {
                         <Text variant="bodyMd" as="span">
                           {inventoryEdge.node.location.name}
                         </Text>
-                      </IndexTable.Cell>
-                      <IndexTable.Cell>
-                        <Text variant="bodyMd" as="span">
-                          {inventoryEdge.node.location.activatable ? 'Active' : 'Inactive'}
-                        </Text>
-                      </IndexTable.Cell>
+                      </IndexTable.Cell>                      
                     </IndexTable.Row>
                   ))}
                 </IndexTable.Row>
@@ -224,7 +219,6 @@ import {
               { title: 'Price' },
               { title: 'available' },
               { title: 'location Name' },
-              { title: 'location Status' },
             ]}
             selectable={false}
             pagination={{

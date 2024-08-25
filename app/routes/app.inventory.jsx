@@ -1,25 +1,221 @@
-
-
-
-
-
-
-// // import { useLoaderData } from '@remix-run/react';
-
-// // export const loader = async () => {
-// //   const response = await fetch(`${process.env.BASE_URL}/api/products`); // Calling your internal API
-// //   return response.json();
-// // };
-
-// export default function Products() {
-
-
-//   return (
-//     <div>
-//       <h1>Products List</h1>
-//       <ul>
-//        <li>Yash</li>
-//       </ul>
-//     </div>
-//   );
-// }
+import {
+    Box,
+    Card,
+    Layout,
+    Link,
+    List,
+    Page,
+    Text,
+    BlockStack,
+    Button,
+    IndexTable,
+    LegacyCard,
+    useBreakpoints,
+  } from "@shopify/polaris";
+  import { TitleBar } from "@shopify/app-bridge-react";
+  import { authenticate, apiVersion } from "../shopify.server";
+  import { useLoaderData, useNavigate, useLocation } from "@remix-run/react";
+  
+  export const query = `
+    query Products($first: Int, $afterCursor: String, $last: Int, $beforeCursor: String) {
+        products(first: $first, after: $afterCursor, last: $last, before: $beforeCursor) {
+        edges {
+        node {
+          id
+          title
+          vendor
+          status
+          variants(first: 5) {
+            nodes {
+              id
+              displayName
+              price
+              inventoryQuantity
+              inventoryItem {
+                id
+                inventoryLevel {
+                  available
+                  location {
+                    name
+                  }
+                }
+              }
+              contextualPricing(context: {}) {
+                compareAtPrice {
+                  amount
+                  currencyCode
+                }
+                price {
+                  amount
+                  currencyCode
+                }
+              }
+            }
+          }
+        }
+      }
+        pageInfo {
+          endCursor
+          hasNextPage
+          hasPreviousPage
+          startCursor
+        }
+      }
+    }
+  `;
+  
+  export const loader = async ({ request }) => { 
+    const { session } = await authenticate.admin(request);
+    const { shop, accessToken } = session;
+  
+    const url = new URL(request.url);
+    const afterCursor = url.searchParams.get("afterCursor") || null;
+    const beforeCursor = url.searchParams.get("beforeCursor") || null;
+  
+    const variables = {
+      first: beforeCursor ? null : 20,
+      afterCursor: afterCursor,
+      last: beforeCursor ? 20 : null,
+      beforeCursor: beforeCursor
+    };
+  
+    const queryWithVariables = JSON.stringify({
+      query: query,
+      variables: variables
+    });
+  
+    try {
+      const response = await fetch(`https://${shop}/admin/api/${apiVersion}/graphql.json`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Access-Token": accessToken
+        },
+        body: queryWithVariables
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        const { products } = data.data;
+  
+        return {
+          products: products.edges,
+          hasNextPage: products.pageInfo.hasNextPage,
+          endCursor: products.pageInfo.endCursor,
+          hasPreviousPage: products.pageInfo.hasPreviousPage,
+          startCursor: products.pageInfo.startCursor,
+        };
+      }
+  
+      return null;
+  
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      throw error;
+    }
+  };
+  
+  export default function ProductsPage() {
+    const { products, hasNextPage, endCursor, hasPreviousPage, startCursor } = useLoaderData();
+    const navigate = useNavigate();
+  
+    const handleNextPage = () => {
+      if (hasNextPage) {
+        navigate(`?afterCursor=${endCursor}`);
+      }
+    };
+  
+    const handlePreviousPage = () => {
+      if (hasPreviousPage) {
+        navigate(`?beforeCursor=${startCursor}`);
+      }
+    };
+  
+    const resourceName = {
+      singular: 'product',
+      plural: 'products',
+    };
+  
+    const rowMarkup = products.map(
+      (product, index) => (
+        <React.Fragment key={product.node.id}>
+          <IndexTable.Row id={product.node.id} key={product.node.id} position={index}>
+            <IndexTable.Cell>
+              <Text variant="bodyMd" fontWeight="bold" as="span">
+                {product.node.title.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}
+              </Text>
+            </IndexTable.Cell>
+            <IndexTable.Cell>{product.node.vendor.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
+            <IndexTable.Cell>{product.node.status.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
+            <IndexTable.Cell>
+              {new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: product.node.variants.nodes[0].contextualPricing.price.currencyCode,
+              }).format(product.node.variants.nodes[0].contextualPricing.price.amount)}
+            </IndexTable.Cell>
+          </IndexTable.Row>
+          {product.node.variants.nodes.map((variant) => (
+            <IndexTable.Row
+              key={variant.id}
+              id={variant.id}
+              rowType="child"
+              position={index + 1}
+            >
+              <IndexTable.Cell>
+                <Text variant="bodyMd" as="span">
+                  {variant.displayName}
+                </Text>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                {new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: variant.contextualPricing.price.currencyCode,
+                }).format(variant.contextualPricing.price.amount)}
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <Text as="span" numeric>
+                  {variant.inventoryItem.inventoryLevel.available}
+                </Text>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <Text as="span" numeric>
+                  {variant.inventoryItem.inventoryLevel.location.name}
+                </Text>
+              </IndexTable.Cell>
+            </IndexTable.Row>
+          ))}
+        </React.Fragment>
+      ),
+    );
+  
+    return (
+      <Page>
+        <TitleBar title="Products" />
+        <LegacyCard>
+          <IndexTable
+            condensed={useBreakpoints().smDown}
+            resourceName={resourceName}
+            itemCount={products.length}
+            headings={[
+              { title: 'Title' },
+              { title: 'Vendor' },
+              { title: 'Status' },
+              { title: 'Price' },
+              { title: 'Inventory' },
+              { title: 'Location' },
+            ]}
+            selectable={false}
+            pagination={{
+              hasNext: hasNextPage,
+              onNext: handleNextPage,
+              hasPrevious: hasPreviousPage,
+              onPrevious: handlePreviousPage,
+            }}
+          >
+            {rowMarkup}
+          </IndexTable>
+        </LegacyCard>
+      </Page>
+    );
+  }
+  

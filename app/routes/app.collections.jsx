@@ -1,5 +1,5 @@
 import { TitleBar } from "@shopify/app-bridge-react";
-import { LegacyCard, Page, ResourceItem, ResourceList } from "@shopify/polaris"; // Ensure Polaris components are imported
+import { Avatar, LegacyCard, Page, ResourceItem, ResourceList, Text } from "@shopify/polaris"; // Ensure Polaris components are imported
 import { useLoaderData } from "@remix-run/react"; // Import useLoaderData
 
 import { authenticate, apiVersion } from "../shopify.server";
@@ -65,7 +65,7 @@ export default function Reports() {
   if (!collections || collections.length === 0) {
     return (
       <Page>
-        <TitleBar title="Orders" />
+        <TitleBar title="Collections" />
         <p>No collections found.</p>
       </Page>
     );

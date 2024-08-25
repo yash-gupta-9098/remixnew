@@ -151,6 +151,7 @@ import {
             <IndexTable.Cell />
             <IndexTable.Cell />
             <IndexTable.Cell />
+            <IndexTable.Cell />
           </IndexTable.Row>
   
           {/* Nested Rows for Variants and Inventory */}

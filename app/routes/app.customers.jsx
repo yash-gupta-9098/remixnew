@@ -1,73 +1,164 @@
-// customers.jsx
-import { json } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
-import { Page, Card, DataTable, Layout, Spinner } from '@shopify/polaris';
+import {
+  Box,
+  Card,
+  Layout,
+  Link,
+  List,
+  Page,
+  Text,
+  BlockStack,
+  Button,
+  IndexTable,
+  LegacyCard,
+  useBreakpoints,
+} from "@shopify/polaris";
+import { TitleBar } from "@shopify/app-bridge-react";
+import { authenticate, apiVersion } from "../shopify.server";
+import { useLoaderData, useNavigate, useLocation } from "@remix-run/react";
 
-// Loader function to fetch customer data from Shopify API
-export const loader = async () => {
-    const { session , admin } = await authenticate.admin(request);  
+export const query = `
+  query customers($first: Int, $afterCursor: String, $last: Int, $beforeCursor: String) {
+      customers(first: $first, after: $afterCursor, last: $last, before: $beforeCursor) {
+      edges {
+          node {
+            id
+            displayName
+            email
+            phone
+            
+          }
+        }
+    }
+      pageInfo {
+        endCursor
+        hasNextPage
+        hasPreviousPage
+        startCursor
+      }
+    }
+  }
+`;
+
+export const loader = async ({ request }) => { 
+  const { session } = await authenticate.admin(request);
+  const { shop, accessToken } = session;
+
+  const url = new URL(request.url);
+  const afterCursor = url.searchParams.get("afterCursor") || null;
+  const beforeCursor = url.searchParams.get("beforeCursor") || null;
+
+  const variables = {
+    first: beforeCursor ? null : 20,  // 10 for initial load or forward pagination
+    afterCursor: afterCursor,
+    last: beforeCursor ? 20 : null, // 10 for backward pagination
+    beforeCursor: beforeCursor
+  };
+
+
+  const queryWithVariables = JSON.stringify({
+    query: query,
+    variables: variables
+  });
+
   try {
-
-    const response = await admin.rest.resources.Customer.all({
-      session: session,
+    const response = await fetch(`https://${shop}/admin/api/${apiVersion}/graphql.json`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": accessToken
+      },
+      body: queryWithVariables
     });
-    // const response = await fetch(`https://${shop}/admin/api/2024-01/customers.json`, {
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'X-Shopify-Access-Token': accessToken, // Replace with your actual token
-    //   },
-    // });
 
+    if (response.ok) {
+      const data = await response.json();
+      const { products } = data.data;
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch customers');
+      return {
+        customers: products.edges,
+        hasNextPage: products.pageInfo.hasNextPage,
+        endCursor: products.pageInfo.endCursor,
+        hasPreviousPage: products.pageInfo.hasPreviousPage,
+        startCursor: products.pageInfo.startCursor,
+      };
     }
 
-    const data = await response.json();
-    console.log(data , "data");
-    return json({ customers: data.customers });
+    return null;
+
   } catch (error) {
-    console.error('Error fetching customers:', error);
-    return json({ customers: [] });
+    console.error("Error fetching products:", error);
+    throw error;
   }
 };
 
-export default function CustomersPage() {
-  // Get the customer data from the loader using useLoaderData
-  const { customers } = useLoaderData();
+export default function ProductsPage() {
+  const { customers, hasNextPage, endCursor, hasPreviousPage, startCursor } = useLoaderData();
+  console.log(customers ,  "products");
+  const navigate = useNavigate();
+ 
 
-  // Prepare data for the Polaris DataTable
-  const rows = customers.map((customer) => [
-    customer.first_name || 'N/A',
-    customer.last_name || 'N/A',
-    customer.email || 'N/A',
-    customer.phone || 'N/A',
-    customer.orders_count || 0,
-    `$${customer.total_spent || 0}`,
-  ]);
+  const handleNextPage = () => {
+    if (hasNextPage) {
+      navigate(`?afterCursor=${endCursor}`);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (hasPreviousPage) {
+      navigate(`?beforeCursor=${startCursor}`);
+    }
+  };
+
+  const rowMarkup = products.map(
+    (node, index) => (
+      <IndexTable.Row id={node.node.id} key={node.node.id} position={index}>
+        <IndexTable.Cell>
+          <Text variant="bodyMd" fontWeight="bold" as="span">
+            {node.node.title.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}
+          </Text>
+        </IndexTable.Cell>
+        <IndexTable.Cell>{node.node.vendor.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
+        <IndexTable.Cell>{node.node.status.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
+        <IndexTable.Cell>{
+          new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: node.node.variants.nodes[0].contextualPricing.price.currencyCode,
+          }).format(node.node.variants.nodes[0].contextualPricing.price.amount)}
+        </IndexTable.Cell>
+      </IndexTable.Row>
+    ),
+  );
+
+  const resourceName = {
+    singular: 'customer',
+    plural: 'customers',
+  };
 
   return (
-    <Page title="Customer Accounts">
-      <Layout.Section>
-        {customers.length === 0 ? (
-          <Spinner accessibilityLabel="Loading customer data" size="large" />
-        ) : (
-          <Card>
-            <DataTable
-              columnContentTypes={[
-                'text', // First name
-                'text', // Last name
-                'text', // Email
-                'text', // Phone
-                'numeric', // Orders count
-                'numeric', // Total spent
-              ]}
-              headings={['First Name', 'Last Name', 'Email', 'Phone', 'Orders Count', 'Total Spent']}
-              rows={rows}
-            />
-          </Card>
-        )}
-      </Layout.Section>
+    <Page>
+      <TitleBar title="Products" />
+      <LegacyCard>
+        <IndexTable
+          condensed={useBreakpoints().smDown}
+          resourceName={resourceName}
+          itemCount={customers.length}
+          headings={[
+            { title: 'Title' },
+            { title: 'Vendor' },
+            { title: 'Status' },
+            { title: 'Price' },
+          ]}
+          selectable={false}
+          pagination={{
+            hasNext: hasNextPage,
+            onNext: handleNextPage,
+            hasPrevious: hasPreviousPage,
+            onPrevious: handlePreviousPage,
+          }}
+        >
+          {rowMarkup}
+        </IndexTable>
+      </LegacyCard>
     </Page>
   );
 }

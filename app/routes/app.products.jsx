@@ -137,6 +137,7 @@ export default function ProductsPage() {
         </IndexTable.Cell>
         <IndexTable.Cell>{node.node.vendor.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
         <IndexTable.Cell>{node.node.status.toLowerCase().replace(/\b\w/g, char => char.toUpperCase())}</IndexTable.Cell>
+        <IndexTable.Cell>{node.node.variants.nodes[0].inventoryQuantity}</IndexTable.Cell>
         <IndexTable.Cell>{
           new Intl.NumberFormat('en-US', {
             style: 'currency',
@@ -165,6 +166,7 @@ export default function ProductsPage() {
             { title: 'Title' },
             { title: 'Vendor' },
             { title: 'Status' },
+            { title: 'inventory' },
             { title: 'Price' },
           ]}
           selectable={false}

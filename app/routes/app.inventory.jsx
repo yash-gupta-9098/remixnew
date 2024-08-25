@@ -15,6 +15,7 @@ import {
   import { TitleBar } from "@shopify/app-bridge-react";
   import { authenticate, apiVersion } from "../shopify.server";
   import { useLoaderData, useNavigate, useLocation } from "@remix-run/react";
+  import { Fragment } from "react";
   
   export const query = `
     query Products($first: Int, $afterCursor: String, $last: Int, $beforeCursor: String) {
@@ -27,19 +28,22 @@ import {
           status
           variants(first: 5) {
             nodes {
-              id
-              displayName
-              price
-              inventoryQuantity
               inventoryItem {
                 id
-                inventoryLevel {
-                  available
-                  location {
-                    name
+                inventoryLevels(first: 10) {
+                  edges {
+                    node {
+                      id
+                      location {
+                        activatable
+                        name
+                      }
+                    }
                   }
                 }
               }
+              price
+              displayName
               contextualPricing(context: {}) {
                 compareAtPrice {
                   amount
@@ -50,6 +54,7 @@ import {
                   currencyCode
                 }
               }
+              inventoryQuantity
             }
           }
         }
@@ -64,7 +69,7 @@ import {
     }
   `;
   
-  export const loader = async ({ request }) => { 
+  export const loader = async ({ request }) => {
     const { session } = await authenticate.admin(request);
     const { shop, accessToken } = session;
   
@@ -131,14 +136,12 @@ import {
       }
     };
   
-    const resourceName = {
-      singular: 'product',
-      plural: 'products',
-    };
+    const rowMarkup = products.map((product, index) => {
+      const productVariants = product.node.variants.nodes;
   
-    const rowMarkup = products.map(
-      (product, index) => (
-        <React.Fragment key={product.node.id}>
+      return (
+        <Fragment key={product.node.id}>
+          {/* Parent Row for Main Product */}
           <IndexTable.Row id={product.node.id} key={product.node.id} position={index}>
             <IndexTable.Cell>
               <Text variant="bodyMd" fontWeight="bold" as="span">
@@ -150,43 +153,67 @@ import {
             <IndexTable.Cell>
               {new Intl.NumberFormat('en-US', {
                 style: 'currency',
-                currency: product.node.variants.nodes[0].contextualPricing.price.currencyCode,
-              }).format(product.node.variants.nodes[0].contextualPricing.price.amount)}
+                currency: productVariants[0].contextualPricing.price.currencyCode,
+              }).format(productVariants[0].contextualPricing.price.amount)}
             </IndexTable.Cell>
           </IndexTable.Row>
-          {product.node.variants.nodes.map((variant) => (
-            <IndexTable.Row
-              key={variant.id}
-              id={variant.id}
-              rowType="child"
-              position={index + 1}
-            >
-              <IndexTable.Cell>
-                <Text variant="bodyMd" as="span">
-                  {variant.displayName}
-                </Text>
-              </IndexTable.Cell>
-              <IndexTable.Cell>
-                {new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: variant.contextualPricing.price.currencyCode,
-                }).format(variant.contextualPricing.price.amount)}
-              </IndexTable.Cell>
-              <IndexTable.Cell>
-                <Text as="span" numeric>
-                  {variant.inventoryItem.inventoryLevel.available}
-                </Text>
-              </IndexTable.Cell>
-              <IndexTable.Cell>
-                <Text as="span" numeric>
-                  {variant.inventoryItem.inventoryLevel.location.name}
-                </Text>
-              </IndexTable.Cell>
-            </IndexTable.Row>
-          ))}
-        </React.Fragment>
-      ),
-    );
+  
+          {/* Nested Rows for Variants and Inventory */}
+          {productVariants.map((variant, variantIndex) => {
+            return (
+              <Fragment key={variant.inventoryItem.id}>
+                {/* Inventory Row for Each Variant */}
+                <IndexTable.Row rowType="child" id={`variant-${variantIndex}`} position={variantIndex}>
+                  <IndexTable.Cell>
+                    <Text variant="bodyMd" as="span">
+                      {variant.displayName}
+                    </Text>
+                  </IndexTable.Cell>
+                  <IndexTable.Cell>
+                    <Text variant="bodyMd" as="span">
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: variant.contextualPricing.price.currencyCode,
+                      }).format(variant.contextualPricing.price.amount)}
+                    </Text>
+                  </IndexTable.Cell>
+                  <IndexTable.Cell>
+                    <Text variant="bodyMd" as="span">
+                      {variant.inventoryQuantity}
+                    </Text>
+                  </IndexTable.Cell>
+  
+                  {/* Inventory Locations */}
+                  {variant.inventoryItem.inventoryLevels.edges.map((inventoryEdge) => (
+                    <IndexTable.Row
+                      key={inventoryEdge.node.id}
+                      rowType="child"
+                      id={`inventory-${inventoryEdge.node.id}`}
+                    >
+                      <IndexTable.Cell>
+                        <Text variant="bodyMd" as="span">
+                          {inventoryEdge.node.location.name}
+                        </Text>
+                      </IndexTable.Cell>
+                      <IndexTable.Cell>
+                        <Text variant="bodyMd" as="span">
+                          {inventoryEdge.node.location.activatable ? 'Active' : 'Inactive'}
+                        </Text>
+                      </IndexTable.Cell>
+                    </IndexTable.Row>
+                  ))}
+                </IndexTable.Row>
+              </Fragment>
+            );
+          })}
+        </Fragment>
+      );
+    });
+  
+    const resourceName = {
+      singular: 'product',
+      plural: 'products',
+    };
   
     return (
       <Page>
@@ -201,8 +228,6 @@ import {
               { title: 'Vendor' },
               { title: 'Status' },
               { title: 'Price' },
-              { title: 'Inventory' },
-              { title: 'Location' },
             ]}
             selectable={false}
             pagination={{
